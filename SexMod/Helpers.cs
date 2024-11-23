@@ -411,7 +411,7 @@ namespace SexMod
             return result;
         }
 
-        internal static class Empties
+  /*      internal static class Empties
         {
             public static readonly ActionList Actions = new() { Actions = new GameAction[0] };
             public static readonly ConditionsChecker Conditions = new() { Conditions = new Condition[0] };
@@ -427,7 +427,7 @@ namespace SexMod
             public static readonly CueSelection CueSelection = new();
             public static readonly CharacterSelection CharacterSelection = new();
             public static readonly DialogSpeaker DialogSpeaker = new() { NoSpeaker = true };
-        }
+        }*/
     }
 }
 

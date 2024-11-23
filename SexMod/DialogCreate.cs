@@ -9,6 +9,7 @@ using Kingmaker.DialogSystem.Blueprints;
 using Kingmaker.ElementsSystem;
 using Kingmaker.EntitySystem.Entities;
 using Kingmaker.EntitySystem.Persistence;
+using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -338,6 +339,7 @@ namespace SexMod
 
             Cue_32.Speaker.m_SpeakerPortrait = bref;
 
+            Main.Log("CreateAnswer 0!");
 
             if (ResourcesLibrary.TryGetBlueprint<BlueprintDialog>("3180a5aeae0c484a8bfe95acf459878c") != null)
             {
@@ -346,6 +348,7 @@ namespace SexMod
             }
             else
             {
+
                 ActionsHolder ActionsHolder = ResourcesLibrary.TryGetScriptable<ActionsHolder>("aac2a168-0bbb-4058-ba39-a2a636cf6b03");
                 if (ActionsHolder == null)
                 {
@@ -391,11 +394,16 @@ namespace SexMod
                 var pcMale = Helpers.CreateElement<PcMale>(conditionsHolder3);
 
 
+                //Main.loc = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(Main.GetLocFilePath()));
+
+
+                Main.Log("CreateAnswer 1!" + Main.loc.Keys.Count());
+
                 bAR = SimpleDialogBuilder.CreateAnswer
                  (
-                     name: "simpldialog.yrliet.greet.answer.sex",
+                     name: "simpledialog.yrliet.greet.answer.sex",
                      guid: "d35f72ef-a8cd-4b6a-995e-87ca9ded7d9e",
-                     text: "\"Yrliet, I can't meditate, because I can't clear my mind. I have all these sexual thoughts about you and they fill my mind.\"",
+                     text: Main.loc["simpledialog.yrliet.greet.answer.sex"],
 
                      conditionsChecker: new ConditionsChecker()
                      {
@@ -411,7 +419,7 @@ namespace SexMod
                             name: "simpledialog.yrliet.loop.sex",
                             guid: "874e6a3e-3184-4457-aebb-7b2984ddf16f",
                             speaker: bref,
-                            text: "{n}Yrliet slightly raises one of her eyebrows, then slowly starts talking, as if she were talking about a secret cooking recipe only known to a select few. {/n}\"I could give you a long and thorough blowjob, Elantach, every time before we meditate together, but I hope you realize that in the case of any other mon-keigh that would be practically zoophilia on my part. But in your case, being an evolved being, I don't necessarily mind it at all, if you don't mind it either. I would feel honored to allow the eruption of your seminal fluids to grace my taste buds with their presence. Wouldn't you know that in some Aeldari circles, such a delicacy (and the traditional way of acquiring it) is considered an exquisite culinary treat?\"",
+                            text: Main.loc["simpledialog.yrliet.loop.sex"],
                             answerList: new List<BlueprintAnswerBaseReference>()
                             {
                                 SimpleDialogBuilder.CreateAnswerList
@@ -422,9 +430,9 @@ namespace SexMod
                                     {
                                         SimpleDialogBuilder.CreateAnswer
                                         (
-                                            name: "simpledialog.yrliet.greet.answer.sex",
+                                            name: "simpledialog.yrliet.answer.sex",
                                             guid: "1ec21e87-6f9f-4cc1-946d-9ea5c63af96d",
-                                            text: "\"Sweet! I don't mind it at all!\"",
+                                            text: Main.loc["simpledialog.yrliet.answer.sex"],
                                             onSelect: new ActionList()
                                             {
                                                 Actions = new GameAction[]
@@ -441,7 +449,7 @@ namespace SexMod
                                                     name: "simpledialog.yrliet.loop.1",
                                                     guid: "C2F218D7-AB52-4313-A582-C39986CC4450",
                                                     speaker: bref,
-                                                    text: "{n}Most of the fluids filled up her mouth, but at some point, the forceful tension caused the virile manhood to pop out of the embrace of her lips and spray all over her face and chest. Still, one eye shut, closed by the viscous nature of the liquid, she used her long and elegant finger to scoop it off from wherever she could, then she licked it off, savoring it like it was some millennia-old wine. Finally, she sighs: {/n}\"That was exquisite, {name}...\"",
+                                                    text: Main.loc["simpledialog.yrliet.loop.1"],
                                                                             
                                                     onStop: new ActionList()
                                                     {
@@ -468,7 +476,7 @@ namespace SexMod
                                         (
                                             name: "simpledialog.yrliet.exit",
                                             guid: "52e84e46-8144-4a82-b850-c7b562a5ce21",
-                                            text: "\"Maybe next time.\"",
+                                            text: Main.loc["simpledialog.yrliet.exit"],
                                             nextCues: new List<BlueprintCueBaseReference>()
                                             {
                                                 SimpleDialogBuilder.CreateCue
@@ -476,7 +484,7 @@ namespace SexMod
                                                     name: "simpledialog.yrliet.exit.response",
                                                     guid: "defe9f7c-684e-4c71-9e67-c00fd2b72115",
                                                     speaker: bref,
-                                                    text: "\"Namárië, Elantach!\""
+                                                    text: Main.loc["simpledialog.yrliet.exit.response"]
                                                 )
                                             }
                                         )
@@ -487,6 +495,7 @@ namespace SexMod
                      }
                  );
 
+                Main.Log("CreateAnswer 2!");
 
                 if (ResourcesLibrary.TryGetBlueprint<BlueprintAnswersList>("2e582cda6d9846b0ab10a338adadd945") != null)
                 {
@@ -502,6 +511,7 @@ namespace SexMod
                 }
 
 
+                Main.Log("CreateAnswer 3!");
 
 
 

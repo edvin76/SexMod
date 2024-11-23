@@ -142,7 +142,7 @@ namespace SexMod
         public static readonly ShowCheck ShowCheck = new ShowCheck();
         public static readonly CueSelection CueSelection = new CueSelection();
         public static readonly CharacterSelection CharacterSelection = new CharacterSelection();
-        public static readonly DialogSpeaker DialogSpeaker = new DialogSpeaker() { NoSpeaker = true };
+        public static readonly DialogSpeaker DialogSpeaker = new DialogSpeaker() { /*NoSpeaker = true */};
     }
 
     //
@@ -208,7 +208,7 @@ namespace SexMod
             cue.Speaker = new DialogSpeaker()
             {
                 m_Blueprint = speaker,
-                MoveCamera = true
+                //MoveCamera = true
             };
 
             cue.Answers = answerList;

@@ -14,6 +14,8 @@ using Kingmaker.ElementsSystem;
 using Kingmaker.EntitySystem.Entities;
 using Kingmaker.EntitySystem.Persistence;
 using Kingmaker.Localization;
+using Kingmaker.Settings;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -64,6 +66,22 @@ namespace SexMod
 		}
 #endif
 
+		public static Dictionary<string, string> loc = new Dictionary<string, string>();
+
+		public static string GetLocFilePath(string Locale = null)
+		{
+			if (Locale == null)
+				return Path.Combine(UnityModManager.ModsPath, Main.modName, /*"Localization",*/ SettingsRoot.Game.Main.Localization.m_CurrentValue.ToString() + ".json");
+			else
+				return Path.Combine(UnityModManager.ModsPath, Main.modName, /*"Localization",*/ Locale + ".json");
+		}
+
+		public static string ReadLocResource()
+		{
+			Main.Log(JsonUtility.FromJson<string>(File.ReadAllText(GetLocFilePath())));
+				return JsonUtility.FromJson<string>(File.ReadAllText(GetLocFilePath()));
+		}
+
 		[HarmonyPriority(Priority.First)]
 		[HarmonyPatch(typeof(BlueprintsCache), "Init")]
 		public static class BlueprintsCache_Init_Patch
@@ -71,6 +89,8 @@ namespace SexMod
 			//[HarmonyPatch(nameof(BlueprintsCache.Init)), HarmonyPostfix]
 			private static void Postfix()
 			{
+
+
 				if (!Main.isModEnabled)
 					return;
 
@@ -79,7 +99,7 @@ namespace SexMod
 
 				isRTLoaded = true;
 
-
+				loc = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(GetLocFilePath()));
 
 				//DialogCreate.CreateYrlietDialog();
 
@@ -174,6 +194,7 @@ namespace SexMod
 				if (!Main.isModEnabled)
 					return;
 
+				
 
 				// Log("Scenname: " + Game.Instance.CurrentScene.Blueprint.name);
 
@@ -210,9 +231,18 @@ namespace SexMod
                 }
                 */
 
-				if (SceneManager.GetSceneByName("VoidshipBridge_Mechanics").isLoaded)
-				{
+				Log("Start?");
+
+
 				
+
+				if (//Game.Instance.CurrentlyLoadedAreaPart.name.Equals("RTCabin") 
+					SceneManager.GetSceneByName("VoidshipBridge_RTCabin_Mechanics").isLoaded
+					)
+				{
+
+					Log("FOUND - VoidshipBridge_RTCabin_Mechanics");
+
 					DialogCreate.CreateYrlietDialog();
 
 				
@@ -227,8 +257,14 @@ namespace SexMod
 
 		public static void Log(string str)
 		{
+#if DEBUG
+
 			Main.log.Log(str);
+
+			Main.LogStr = Main.LogStr + str + ", ";
+#endif
 		}
+		public static string modName;
 
 		static bool Load(UnityModManager.ModEntry modEntry)
         {
@@ -244,15 +280,29 @@ namespace SexMod
 
 			HarmonyInstance = new Harmony(modEntry.Info.Id);
             HarmonyInstance.PatchAll(Assembly.GetExecutingAssembly());
+
+			var methods = HarmonyInstance.GetPatchedMethods();
+
+			modName = modEntry.Info.Id;
+
+			foreach (var m in methods)
+                {
+
+				Log(m.Name);
+            }
+
             return true;
         }
 
 		public static string s = "undefined";
-        static void OnGUI(UnityModManager.ModEntry modEntry)
+
+		public static string LogStr = "undefined";
+
+		static void OnGUI(UnityModManager.ModEntry modEntry)
         {
 #if DEBUG
 			GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
-			//GUILayout.Label("c: "+ DialogCreate.c.ToString());
+			GUILayout.Label("LOG: "+ Main.LogStr);
 			GUILayout.EndHorizontal();
 
 			GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
@@ -274,7 +324,7 @@ namespace SexMod
 
 
 
-				//		DialogCreate.CreateYrlietDialog();
+						DialogCreate.CreateYrlietDialog();
 
 				//		DialogCreate.ReplaceYrlietMeditationActionHolder();
 
