@@ -1,4 +1,5 @@
 ﻿using Kingmaker;
+using Kingmaker.AreaLogic.Cutscenes;
 using Kingmaker.Blueprints;
 using Kingmaker.Blueprints.Area;
 using Kingmaker.Code.UI.MVVM.VM.Fade;
@@ -23,6 +24,31 @@ namespace SexMod
 {
     class DialogCreate
     {
+
+
+        public class StartMeditate : GameAction
+        {
+
+            public override void RunAction()
+            {
+                //BlueprintUnit bpUnit = ResourcesLibrary.TryGetBlueprint<BlueprintUnit>("20c5ce9f1e2bcf9448a7a0fd0850f5d2");
+               
+
+
+                Cutscene cs1 = ResourcesLibrary.TryGetBlueprint<Cutscene>("fe236c09e1d04d088a1c69973b2db010");
+                CutscenePlayerView.Play(cs1);
+
+
+            }
+
+            public override string GetCaption()
+            {
+
+                return "";
+            }
+        }
+
+
         private static IEnumerator FadeOutCoroutine()
         {
             FadeCanvas.Fadeout(true);
@@ -323,8 +349,31 @@ namespace SexMod
 
         public static void CreateYrlietDialog()
         {
+            Main.Log("CreateYrlietDialog()");
 
-            //{mf|Master|Mistress}
+
+
+
+
+
+            if (ResourcesLibrary.TryGetBlueprint<BlueprintAnswersList>("2e582cda6d9846b0ab10a338adadd945") != null)
+            {
+                BlueprintAnswersList answersList = ResourcesLibrary.TryGetBlueprint<BlueprintAnswersList>("2e582cda6d9846b0ab10a338adadd945");
+
+                // BlueprintAnswer ba = ResourcesLibrary.TryGetBlueprint<BlueprintAnswer>("d35f72efa8cd4b6a995e87ca9ded7d9e");
+
+                foreach (BlueprintAnswer ba in answersList.Answers)
+                {
+                    if (ba.name.Contains("simpledialog"))
+                    {
+                        return;
+                    }
+                }
+            }
+
+            Main.Log("CreateYrlietDialog() 2");
+            
+
             BlueprintDialogReference dialog;
 
             BlueprintAnswerBaseReference bAR;
@@ -334,12 +383,15 @@ namespace SexMod
 
             
 
+            //{mf|Master|Mistress}
+
+
+
             BlueprintCue Cue_32 = ResourcesLibrary.TryGetBlueprint<BlueprintCue>("f1b4fe7d985b4cc480193cf3449b1b67");
             Cue_32.Speaker.m_Blueprint = bref;
 
             Cue_32.Speaker.m_SpeakerPortrait = bref;
 
-            Main.Log("CreateAnswer 0!");
 
             if (ResourcesLibrary.TryGetBlueprint<BlueprintDialog>("3180a5aeae0c484a8bfe95acf459878c") != null)
             {
@@ -397,7 +449,7 @@ namespace SexMod
                 //Main.loc = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(Main.GetLocFilePath()));
 
 
-                Main.Log("CreateAnswer 1!" + Main.loc.Keys.Count());
+               // Main.Log("CreateAnswer 1!" + Main.loc.Keys.Count());
 
                 bAR = SimpleDialogBuilder.CreateAnswer
                  (
@@ -495,7 +547,7 @@ namespace SexMod
                      }
                  );
 
-                Main.Log("CreateAnswer 2!");
+                //Main.Log("CreateAnswer 2!");
 
                 if (ResourcesLibrary.TryGetBlueprint<BlueprintAnswersList>("2e582cda6d9846b0ab10a338adadd945") != null)
                 {
@@ -511,7 +563,7 @@ namespace SexMod
                 }
 
 
-                Main.Log("CreateAnswer 3!");
+                //Main.Log("CreateAnswer 3!");
 
 
 

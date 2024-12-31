@@ -1,5 +1,8 @@
 ﻿using HarmonyLib;
 using Kingmaker;
+using Kingmaker.AreaLogic.Cutscenes;
+using Kingmaker.AreaLogic.Cutscenes.Commands;
+using Kingmaker.AreaLogic.Etudes;
 using Kingmaker.AreaLogic.QuestSystem;
 using Kingmaker.Blueprints;
 using Kingmaker.Blueprints.Area;
@@ -8,11 +11,13 @@ using Kingmaker.Blueprints.Quests;
 using Kingmaker.Cheats;
 using Kingmaker.Designers.EventConditionActionSystem.Actions;
 using Kingmaker.Designers.EventConditionActionSystem.Conditions;
+using Kingmaker.Designers.EventConditionActionSystem.Events;
 using Kingmaker.DialogSystem.Blueprints;
 using Kingmaker.DLC;
 using Kingmaker.ElementsSystem;
 using Kingmaker.EntitySystem.Entities;
 using Kingmaker.EntitySystem.Persistence;
+using Kingmaker.GameCommands;
 using Kingmaker.Localization;
 using Kingmaker.Settings;
 using Newtonsoft.Json;
@@ -71,7 +76,12 @@ namespace SexMod
 		public static string GetLocFilePath(string Locale = null)
 		{
 			if (Locale == null)
-				return Path.Combine(UnityModManager.ModsPath, Main.modName, /*"Localization",*/ SettingsRoot.Game.Main.Localization.m_CurrentValue.ToString() + ".json");
+			{
+				if (File.Exists(Path.Combine(UnityModManager.ModsPath, Main.modName, /*"Localization",*/ SettingsRoot.Game.Main.Localization.m_CurrentValue.ToString() + ".json")))
+					return Path.Combine(UnityModManager.ModsPath, Main.modName, /*"Localization",*/ SettingsRoot.Game.Main.Localization.m_CurrentValue.ToString() + ".json");
+				else
+					return Path.Combine(UnityModManager.ModsPath, Main.modName, /*"Localization",*/ "enGB.json");
+			}
 			else
 				return Path.Combine(UnityModManager.ModsPath, Main.modName, /*"Localization",*/ Locale + ".json");
 		}
@@ -99,7 +109,7 @@ namespace SexMod
 
 				isRTLoaded = true;
 
-				loc = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(GetLocFilePath()));
+			//	loc = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(GetLocFilePath()));
 
 				//DialogCreate.CreateYrlietDialog();
 
@@ -117,10 +127,37 @@ namespace SexMod
 				currentAreaPartIsNot.m_AreaPart = rtCabin.ToReference<BlueprintAreaPartReference>();
 				currentAreaPartIsNot.Not = true;
 
+				/*
+				
+				Cutscene cs = ResourcesLibrary.TryGetBlueprint<Cutscene>("fc46d3e602eb4ec186bafe969cc3ddec");
+				if (cs.m_Tracks.Count() == 4)
+				{
+					cs.m_Tracks.RemoveAt(2);
+					cs.m_Tracks.RemoveAt(2);
+				}
+
+
+				cs.OnStopped.Actions = cs.OnStopped.Actions.Where((value, index) => index != 0).ToArray();
+
+
+				BlueprintEtude be = ResourcesLibrary.TryGetBlueprint<BlueprintEtude>("7ff8d4be5722449980d29c2b0c14e4ae");
+				//cs.OnStopped.Actions = null;
+				((DeactivateTrigger)be.Components[0]).Actions.Actions = ((DeactivateTrigger)be.Components[0]).Actions.Actions.Where((value, index) => index != 2).ToArray();
+
+
+
+				BlueprintEtude be2 = ResourcesLibrary.TryGetBlueprint<BlueprintEtude>("c7c76f31f6574c7f9efa5d4ec5b7f846");
+
+				((EtudePlayTrigger)be2.Components[0]).Actions.Actions = ((EtudePlayTrigger)be2.Components[0]).Actions.Actions.Where((value, index) => index != 1).ToArray();
+				((DeactivateTrigger)be2.Components[1]).Actions.Actions = ((DeactivateTrigger)be2.Components[1]).Actions.Actions.Where((value, index) => index != 0).ToArray();
+
+
+
+				*/
 
 				BlueprintAnswer ba1 = ResourcesLibrary.TryGetBlueprint<BlueprintAnswer>("222d7429892b4864a40c38f8a061034e");
 				ba1.ShowConditions.Conditions = ba1.ShowConditions.Conditions.Append<Condition>(currentAreaPartIsNot).ToArray();
-				
+
 				BlueprintAnswer ba2 = ResourcesLibrary.TryGetBlueprint<BlueprintAnswer>("8fa0a37925ef45b7a94cffcfbdb44b53");
 				ba2.ShowConditions.Conditions = ba2.ShowConditions.Conditions.Append<Condition>(currentAreaPartIsNot).ToArray();
 
@@ -231,11 +268,50 @@ namespace SexMod
                 }
                 */
 
-				Log("Start?");
+				Log("OnAreaLoaded Start");
 
 
+
+
+				BlueprintCue Cue_86 = ResourcesLibrary.TryGetBlueprint<BlueprintCue>("75832b318c534005beff4ee87e71815d");
 				
+				Log("OnAreaLoaded 1");
 
+
+				//Cue_86.Speaker.m_Blueprint = bref;
+				//Cue_86.Speaker.m_SpeakerPortrait = bref;
+				if (Cue_86 != null)
+					Log("found cue_86");
+				else
+					Log("not found cue_86");
+
+				ActionsHolder ActionsHolder0 = ResourcesLibrary.TryGetScriptable<ActionsHolder>("CF8C05ED-20E6-40E7-B6ED-F68FF3D94B31");
+				if (ActionsHolder0 == null)
+				{
+					//$PlayCutscene$
+					ActionsHolder0 = Helpers.CreateAndAddESO<ActionsHolder>("Start_Meditate", "CF8C05ED-20E6-40E7-B6ED-F68FF3D94B31");
+
+					Log("AH created name: " + ActionsHolder0.name);
+				}
+				//   Log("ActionName: "+ActionName);
+				var startMeditate = Helpers.CreateElement<DialogCreate.StartMeditate>(ActionsHolder0);
+
+
+				Cue_86.OnStop = new ActionList()
+				{
+					Actions = new GameAction[]
+													{
+													startMeditate
+													}
+				};
+
+				foreach (GameAction ga in Cue_86.OnStop.Actions)
+				{
+				
+					Log("GameAction: " + ga.name + " - " + ga.GetType().Name);
+				
+				}
+				/*
 				if (//Game.Instance.CurrentlyLoadedAreaPart.name.Equals("RTCabin") 
 					SceneManager.GetSceneByName("VoidshipBridge_RTCabin_Mechanics").isLoaded
 					)
@@ -247,7 +323,29 @@ namespace SexMod
 
 				
 
+				}*/
+
+				Log("OnAreaLoaded 2");
+
+
+				DialogCreate.CreateYrlietDialog();
+
+
+				foreach (KeyValuePair<BlueprintUnlockableFlag, int> unlockedFlag in Game.Instance.Player.UnlockableFlags.UnlockedFlags)
+				{
+					if (unlockedFlag.Key.name.Equals("Meditation"))
+					{
+						Log("OnAreaLoaded 3");
+
+						if (Game.Instance.Player.UnlockableFlags.GetFlagValue(unlockedFlag.Key) < 0)
+							Game.Instance.Player.UnlockableFlags.SetFlagValue(unlockedFlag.Key, 0);
+
+						Log("OnAreaLoaded 4");
+
+					}
 				}
+
+				Log("OnAreaLoaded 5");
 			}
 		}
 		internal static Harmony HarmonyInstance;
@@ -285,22 +383,106 @@ namespace SexMod
 
 			modName = modEntry.Info.Id;
 
+			/*
 			foreach (var m in methods)
                 {
 
 				Log(m.Name);
-            }
+            }*/
 
-            return true;
+			loc = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(GetLocFilePath()));
+
+			return true;
         }
 
-		public static string s = "undefined";
+		public static string s = "undefined, ";
 
-		public static string LogStr = "undefined";
+		public static string LogStr = "undefined, ";
 
 		static void OnGUI(UnityModManager.ModEntry modEntry)
         {
 #if DEBUG
+
+			BlueprintCue Cue_86 = ResourcesLibrary.TryGetBlueprint<BlueprintCue>("75832b318c534005beff4ee87e71815d");
+			foreach (GameAction ga in Cue_86.OnStop.Actions)
+			{
+				GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
+				GUILayout.Label("GameAction: " + ga.name + " - " + ga.GetType().Name);
+				GUILayout.EndHorizontal();
+			}
+
+
+			if (ResourcesLibrary.TryGetBlueprint<BlueprintAnswersList>("2e582cda6d9846b0ab10a338adadd945") != null)
+			{
+				BlueprintAnswersList answersList = ResourcesLibrary.TryGetBlueprint<BlueprintAnswersList>("2e582cda6d9846b0ab10a338adadd945");
+
+				// BlueprintAnswer ba = ResourcesLibrary.TryGetBlueprint<BlueprintAnswer>("d35f72efa8cd4b6a995e87ca9ded7d9e");
+
+				foreach (BlueprintAnswer ba in answersList.Answers)
+				{
+					if (ba.name.Contains("simpledialog"))
+					{
+						GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
+						GUILayout.Label("Answer: " + ba.name);
+						GUILayout.EndHorizontal();
+					}
+				}
+			}
+			/*
+
+			Cutscene cs = ResourcesLibrary.TryGetBlueprint<Cutscene>("fc46d3e602eb4ec186bafe969cc3ddec");
+			
+			GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
+			GUILayout.Label("Onstopped actions: " + cs.OnStopped.Actions.Length);
+			GUILayout.EndHorizontal();
+
+			if (cs.OnStopped.Actions != null)
+			{
+				foreach (GameAction ga in cs.OnStopped.Actions)
+				{
+					GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
+					GUILayout.Label("GameAction: " + ga.name + " - " + ga.GetType().Name);
+					GUILayout.EndHorizontal();
+				}
+			}
+			else
+			{
+				GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
+				GUILayout.Label("GameAction is null or zero length");
+				GUILayout.EndHorizontal();
+			}
+
+			if (cs.m_Tracks.Count() > 0)
+			{
+				cs.m_Tracks.ForEach(item =>
+
+				{
+					GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
+					GUILayout.Label("m_Track item: " + item.m_Commands.ElementAt<CommandReference>(1));
+					GUILayout.EndHorizontal();
+
+				}
+
+				);
+			}
+
+
+			BlueprintEtude be2 = ResourcesLibrary.TryGetBlueprint<BlueprintEtude>("c7c76f31f6574c7f9efa5d4ec5b7f846");
+
+			GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
+			GUILayout.Label("actions: " + ((EtudePlayTrigger)be2.Components[0]).Actions.Actions.Length);
+			GUILayout.EndHorizontal();
+
+			GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
+			GUILayout.Label("actions 2: " + ((DeactivateTrigger)be2.Components[1]).Actions.Actions.Length);
+			GUILayout.EndHorizontal();
+
+			*/
+
+
+
+
+
 			GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
 			GUILayout.Label("LOG: "+ Main.LogStr);
 			GUILayout.EndHorizontal();
@@ -317,21 +499,74 @@ namespace SexMod
 			GUILayout.Label("CLAPn: " + Game.Instance.CurrentlyLoadedAreaPart.name);
 			GUILayout.EndHorizontal();
 
+
 			GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
-			if (GUILayout.Button("Replace Yrliet bark", GUILayout.Width(200f), GUILayout.Height(20f)))
+			if (GUILayout.Button("Create Yrliet Dialog", GUILayout.Width(200f), GUILayout.Height(20f)))
+			{
+				DialogCreate.CreateYrlietDialog();
+				//DialogCreate.ReplaceYrlietMeditationActionHolder();
+			}
+			GUILayout.EndHorizontal(); 
+			GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
+			if (GUILayout.Button("Meditation", GUILayout.Width(200f), GUILayout.Height(20f)))
+			{
+				Cutscene cs1 = ResourcesLibrary.TryGetBlueprint<Cutscene>("fe236c09e1d04d088a1c69973b2db010");
+				CutscenePlayerView.Play(cs1);
+			}
+			GUILayout.EndHorizontal(); 
+			GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
+			if (GUILayout.Button("Find sex answer", GUILayout.Width(200f), GUILayout.Height(20f)))
 			{
 
-
-
-
-						DialogCreate.CreateYrlietDialog();
-
-				//		DialogCreate.ReplaceYrlietMeditationActionHolder();
-
-
+				//BlueprintEtude et = ResourcesLibrary.TryGetBlueprint<BlueprintEtude>("c7c76f31f6574c7f9efa5d4ec5b7f846");
+				//Game.Instance.Player.EtudesSystem.StartEtude(et);
+			
 			}
 			GUILayout.EndHorizontal();
 
+
+
+			GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
+			GUILayout.Label("UNLOCKEDFLAGS:");
+			GUILayout.EndHorizontal();
+			foreach (KeyValuePair<BlueprintUnlockableFlag, int> unlockedFlag in Game.Instance.Player.UnlockableFlags.UnlockedFlags)
+			{
+				if (unlockedFlag.Key.name.Contains("Meditation"))
+				{
+					GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
+					GUILayout.Label(unlockedFlag.Key.name + " : " + unlockedFlag.Value);
+					GUILayout.EndHorizontal();
+				}
+			}
+			
+			GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
+			if (GUILayout.Button("Increase Meditation", GUILayout.Width(200f), GUILayout.Height(20f)))
+			{
+				foreach (KeyValuePair<BlueprintUnlockableFlag, int> unlockedFlag in Game.Instance.Player.UnlockableFlags.UnlockedFlags)
+				{
+					if (unlockedFlag.Key.name.Equals("Meditation"))
+					{
+						Game.Instance.Player.UnlockableFlags.SetFlagValue(unlockedFlag.Key, Game.Instance.Player.UnlockableFlags.GetFlagValue(unlockedFlag.Key) + 1); ;
+					}
+				}
+			}
+			
+			GUILayout.EndHorizontal(); 
+			GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
+			if (GUILayout.Button("STOP CUTSCENE!!!!!!!", GUILayout.Width(200f), GUILayout.Height(20f)))
+			{
+				Game.Instance.GameCommandQueue.SkipCutscene();
+			}
+			/*
+			GUILayout.EndHorizontal(); 
+			GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
+			if (GUILayout.Button("Replace Yrliet bark", GUILayout.Width(200f), GUILayout.Height(20f)))
+			{
+				Cutscene cs = ResourcesLibrary.TryGetBlueprint<Cutscene>("fe236c09e1d04d088a1c69973b2db010");
+				CutscenePlayerView.Play(cs);
+			}
+			GUILayout.EndHorizontal();
+			*/
 			GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
 			GUILayout.Label("s: " + s);
 			GUILayout.EndHorizontal();
