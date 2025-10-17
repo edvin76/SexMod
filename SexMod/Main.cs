@@ -37,12 +37,15 @@ namespace SexMod
 #if DEBUG
     [EnableReloading]
 #endif
-    //+:cnd:noEmit
+	//+:cnd:noEmit
 
-    static class Main
+	static class Main
     {
 
-#if DEBUG
+
+
+
+//#if DEBUG
 		[HarmonyPatch(typeof(BlueprintDlcReward), "IsAvailable", MethodType.Getter)]
 		internal static class BlueprintDlcReward_IsAvailable_Patch
 		{
@@ -58,7 +61,7 @@ namespace SexMod
 					//Log(__instance.Description);
 
 
-					__result = true;
+					__result = Main.settings.dev;
 					return false;
 
 				}
@@ -69,7 +72,7 @@ namespace SexMod
 				}
 			}
 		}
-#endif
+//#endif
 
 		public static Dictionary<string, string> loc = new Dictionary<string, string>();
 
@@ -231,7 +234,7 @@ namespace SexMod
 				if (!Main.isModEnabled)
 					return;
 
-				
+				Main.settings.dev = false;
 
 				// Log("Scenname: " + Game.Instance.CurrentScene.Blueprint.name);
 
@@ -376,21 +379,34 @@ namespace SexMod
 
 			modEntry.OnToggle = new Func<UnityModManager.ModEntry, bool, bool>(Main.OnToggle);
 
-			HarmonyInstance = new Harmony(modEntry.Info.Id);
+			modEntry.OnSaveGUI = new Action<UnityModManager.ModEntry>(Main.OnSaveGUI);
+
+			modEntry.OnHideGUI = new Action<UnityModManager.ModEntry>(Main.OnHideGUI);
+
+            modEntry.OnShowGUI = new Action<UnityModManager.ModEntry>(Main.OnShowGUI);
+
+
+
+            HarmonyInstance = new Harmony(modEntry.Info.Id);
             HarmonyInstance.PatchAll(Assembly.GetExecutingAssembly());
 
 			var methods = HarmonyInstance.GetPatchedMethods();
 
 			modName = modEntry.Info.Id;
 
-			/*
+			Main.settings = UnityModManager.ModSettings.Load<Settings>(modEntry);
+
+            Main.settings.dev = false;
+
+
+            /*
 			foreach (var m in methods)
                 {
 
 				Log(m.Name);
             }*/
 
-			loc = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(GetLocFilePath()));
+            loc = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(GetLocFilePath()));
 
 			return true;
         }
@@ -399,232 +415,286 @@ namespace SexMod
 
 		public static string LogStr = "undefined, ";
 
-		static void OnGUI(UnityModManager.ModEntry modEntry)
-        {
-#if DEBUG
+		public static Settings settings;
 
-			BlueprintCue Cue_86 = ResourcesLibrary.TryGetBlueprint<BlueprintCue>("75832b318c534005beff4ee87e71815d");
-			foreach (GameAction ga in Cue_86.OnStop.Actions)
+
+		static void OnGUI(UnityModManager.ModEntry modEntry)
+		{
+
+
+
+			Main.settings.male = GUILayout.Toggle(Main.settings.male, "Male Captain", new GUILayoutOption[0]);
+			Main.settings.female = GUILayout.Toggle(Main.settings.female, "Female Captain", new GUILayoutOption[0]);
+
+			if (settings.male == false && settings.female == false)
 			{
+				settings.female = !settings.female;
+				settings.male = !settings.male;
+			}
+
+
+
+            GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
+			Main.settings.dev = GUILayout.Toggle(Main.settings.dev, "Developer Mode", new GUILayoutOption[0]);
+			GUILayout.EndHorizontal();
+
+
+
+			if (Main.settings.dev)
+			{
+
 				GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
-				GUILayout.Label("GameAction: " + ga.name + " - " + ga.GetType().Name);
+				if (GUILayout.Button("Get answer", GUILayout.Width(200f), GUILayout.Height(20f)))
+				{
+
+					//d35f72efa8cd4b6a995e87ca9ded7d9e
+					BlueprintAnswer ba = ResourcesLibrary.TryGetBlueprint<BlueprintAnswer>("d35f72efa8cd4b6a995e87ca9ded7d9e");
+					if (ba)
+						Log(ba.name);
+					else
+						Log("no ba");
+				}
+				GUILayout.EndHorizontal();
+				GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
+				GUILayout.Label("LOG: " + Main.LogStr);
 				GUILayout.EndHorizontal();
 			}
 
-
-			if (ResourcesLibrary.TryGetBlueprint<BlueprintAnswersList>("2e582cda6d9846b0ab10a338adadd945") != null)
-			{
-				BlueprintAnswersList answersList = ResourcesLibrary.TryGetBlueprint<BlueprintAnswersList>("2e582cda6d9846b0ab10a338adadd945");
-
-				// BlueprintAnswer ba = ResourcesLibrary.TryGetBlueprint<BlueprintAnswer>("d35f72efa8cd4b6a995e87ca9ded7d9e");
-
-				foreach (BlueprintAnswer ba in answersList.Answers)
-				{
-					if (ba.name.Contains("simpledialog"))
-					{
-						GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
-						GUILayout.Label("Answer: " + ba.name);
-						GUILayout.EndHorizontal();
-					}
-				}
-			}
-			/*
-
-			Cutscene cs = ResourcesLibrary.TryGetBlueprint<Cutscene>("fc46d3e602eb4ec186bafe969cc3ddec");
-			
-			GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
-			GUILayout.Label("Onstopped actions: " + cs.OnStopped.Actions.Length);
-			GUILayout.EndHorizontal();
-
-			if (cs.OnStopped.Actions != null)
-			{
-				foreach (GameAction ga in cs.OnStopped.Actions)
+            #if DEBUG
+            BlueprintCue Cue_86 = ResourcesLibrary.TryGetBlueprint<BlueprintCue>("75832b318c534005beff4ee87e71815d");
+				foreach (GameAction ga in Cue_86.OnStop.Actions)
 				{
 					GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
 					GUILayout.Label("GameAction: " + ga.name + " - " + ga.GetType().Name);
 					GUILayout.EndHorizontal();
 				}
-			}
-			else
-			{
-				GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
-				GUILayout.Label("GameAction is null or zero length");
-				GUILayout.EndHorizontal();
-			}
 
-			if (cs.m_Tracks.Count() > 0)
-			{
-				cs.m_Tracks.ForEach(item =>
 
+				if (ResourcesLibrary.TryGetBlueprint<BlueprintAnswersList>("2e582cda6d9846b0ab10a338adadd945") != null)
 				{
-					GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
-					GUILayout.Label("m_Track item: " + item.m_Commands.ElementAt<CommandReference>(1));
-					GUILayout.EndHorizontal();
+					BlueprintAnswersList answersList = ResourcesLibrary.TryGetBlueprint<BlueprintAnswersList>("2e582cda6d9846b0ab10a338adadd945");
 
-				}
+					// BlueprintAnswer ba = ResourcesLibrary.TryGetBlueprint<BlueprintAnswer>("d35f72efa8cd4b6a995e87ca9ded7d9e");
 
-				);
-			}
-
-
-			BlueprintEtude be2 = ResourcesLibrary.TryGetBlueprint<BlueprintEtude>("c7c76f31f6574c7f9efa5d4ec5b7f846");
-
-			GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
-			GUILayout.Label("actions: " + ((EtudePlayTrigger)be2.Components[0]).Actions.Actions.Length);
-			GUILayout.EndHorizontal();
-
-			GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
-			GUILayout.Label("actions 2: " + ((DeactivateTrigger)be2.Components[1]).Actions.Actions.Length);
-			GUILayout.EndHorizontal();
-
-			*/
-
-
-
-
-
-			GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
-			GUILayout.Label("LOG: "+ Main.LogStr);
-			GUILayout.EndHorizontal();
-
-			GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
-			//GUILayout.Label("str: (StartSex.Run)" + DialogCreate.str);
-			GUILayout.EndHorizontal();
-
-			GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
-			//GUILayout.Label("str2: (test()) " + DialogCreate.str2);
-			GUILayout.EndHorizontal();
-
-			GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
-			GUILayout.Label("CLAPn: " + Game.Instance.CurrentlyLoadedAreaPart.name);
-			GUILayout.EndHorizontal();
-
-
-			GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
-			if (GUILayout.Button("Create Yrliet Dialog", GUILayout.Width(200f), GUILayout.Height(20f)))
-			{
-				DialogCreate.CreateYrlietDialog();
-				//DialogCreate.ReplaceYrlietMeditationActionHolder();
-			}
-			GUILayout.EndHorizontal(); 
-			GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
-			if (GUILayout.Button("Meditation", GUILayout.Width(200f), GUILayout.Height(20f)))
-			{
-				Cutscene cs1 = ResourcesLibrary.TryGetBlueprint<Cutscene>("fe236c09e1d04d088a1c69973b2db010");
-				CutscenePlayerView.Play(cs1);
-			}
-			GUILayout.EndHorizontal(); 
-			GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
-			if (GUILayout.Button("Find sex answer", GUILayout.Width(200f), GUILayout.Height(20f)))
-			{
-
-				//BlueprintEtude et = ResourcesLibrary.TryGetBlueprint<BlueprintEtude>("c7c76f31f6574c7f9efa5d4ec5b7f846");
-				//Game.Instance.Player.EtudesSystem.StartEtude(et);
-			
-			}
-			GUILayout.EndHorizontal();
-
-
-
-			GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
-			GUILayout.Label("UNLOCKEDFLAGS:");
-			GUILayout.EndHorizontal();
-			foreach (KeyValuePair<BlueprintUnlockableFlag, int> unlockedFlag in Game.Instance.Player.UnlockableFlags.UnlockedFlags)
-			{
-				if (unlockedFlag.Key.name.Contains("Meditation"))
-				{
-					GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
-					GUILayout.Label(unlockedFlag.Key.name + " : " + unlockedFlag.Value);
-					GUILayout.EndHorizontal();
-				}
-			}
-			
-			GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
-			if (GUILayout.Button("Increase Meditation", GUILayout.Width(200f), GUILayout.Height(20f)))
-			{
-				foreach (KeyValuePair<BlueprintUnlockableFlag, int> unlockedFlag in Game.Instance.Player.UnlockableFlags.UnlockedFlags)
-				{
-					if (unlockedFlag.Key.name.Equals("Meditation"))
+					foreach (BlueprintAnswer ba in answersList.Answers)
 					{
-						Game.Instance.Player.UnlockableFlags.SetFlagValue(unlockedFlag.Key, Game.Instance.Player.UnlockableFlags.GetFlagValue(unlockedFlag.Key) + 1); ;
+						if (ba.name.Contains("simpledialog"))
+						{
+							GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
+							GUILayout.Label("Answer: " + ba.name + " - " + ba.AssetGuid + " - " + ba.ShowConditions.Conditions[0].GetType());
+							GUILayout.EndHorizontal();
+							if (ba.ShowConditions.Conditions.Count() > 1)
+							{
+								GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
+								GUILayout.Label("2nd condition: " + ba.ShowConditions.Conditions[1].GetType());
+								GUILayout.EndHorizontal();
+							}
+							else
+							{
+								GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
+								GUILayout.Label("2nd condition: NONE");
+								GUILayout.EndHorizontal();
+							}
+
+						}
 					}
 				}
-			}
+
+
+				Cutscene cs = ResourcesLibrary.TryGetBlueprint<Cutscene>("fc46d3e602eb4ec186bafe969cc3ddec");
+
+				GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
+				GUILayout.Label("Onstopped actions: " + cs.OnStopped.Actions.Length);
+				GUILayout.EndHorizontal();
+
+				if (cs.OnStopped.Actions != null)
+				{
+					foreach (GameAction ga in cs.OnStopped.Actions)
+					{
+						GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
+						GUILayout.Label("GameAction: " + ga.name + " - " + ga.GetType().Name);
+						GUILayout.EndHorizontal();
+					}
+				}
+				else
+				{
+					GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
+					GUILayout.Label("GameAction is null or zero length");
+					GUILayout.EndHorizontal();
+				}
+
+				if (cs.m_Tracks.Count() > 0)
+				{
+					cs.m_Tracks.ForEach(item =>
+
+					{
+						GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
+						GUILayout.Label("m_Track item: " + item.m_Commands.ElementAt<CommandReference>(1));
+						GUILayout.EndHorizontal();
+
+					}
+
+					);
+				}
+
+
+				BlueprintEtude be2 = ResourcesLibrary.TryGetBlueprint<BlueprintEtude>("c7c76f31f6574c7f9efa5d4ec5b7f846");
+
+				GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
+				GUILayout.Label("actions: " + ((EtudePlayTrigger)be2.Components[0]).Actions.Actions.Length);
+				GUILayout.EndHorizontal();
+
+				GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
+				GUILayout.Label("actions 2: " + ((DeactivateTrigger)be2.Components[1]).Actions.Actions.Length);
+				GUILayout.EndHorizontal();
+
+
+
+
+
+
+
+
+
+				GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
+				//GUILayout.Label("str: (StartSex.Run)" + DialogCreate.str);
+				GUILayout.EndHorizontal();
+
+				GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
+				//GUILayout.Label("str2: (test()) " + DialogCreate.str2);
+				GUILayout.EndHorizontal();
+
+				GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
+				//GUILayout.Label("CLAPn: " + Game.Instance.CurrentlyLoadedAreaPart.name);
+				GUILayout.EndHorizontal();
+
+
+				GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
+				if (GUILayout.Button("Create Yrliet Dialog", GUILayout.Width(200f), GUILayout.Height(20f)))
+				{
+					DialogCreate.CreateYrlietDialog();
+					//DialogCreate.ReplaceYrlietMeditationActionHolder();
+				}
+				GUILayout.EndHorizontal();
+				GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
+				if (GUILayout.Button("Meditation", GUILayout.Width(200f), GUILayout.Height(20f)))
+				{
+					Cutscene cs1 = ResourcesLibrary.TryGetBlueprint<Cutscene>("fe236c09e1d04d088a1c69973b2db010");
+					CutscenePlayerView.Play(cs1);
+				}
+				GUILayout.EndHorizontal();
+				GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
+				if (GUILayout.Button("Find sex answer", GUILayout.Width(200f), GUILayout.Height(20f)))
+				{
+
+					//BlueprintEtude et = ResourcesLibrary.TryGetBlueprint<BlueprintEtude>("c7c76f31f6574c7f9efa5d4ec5b7f846");
+					//Game.Instance.Player.EtudesSystem.StartEtude(et);
+
+				}
+				GUILayout.EndHorizontal();
+
+
+
+				GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
+				GUILayout.Label("UNLOCKEDFLAGS:");
+				GUILayout.EndHorizontal();
+				foreach (KeyValuePair<BlueprintUnlockableFlag, int> unlockedFlag in Game.Instance.Player.UnlockableFlags.UnlockedFlags)
+				{
+					if (unlockedFlag.Key.name.Contains("Meditation"))
+					{
+						GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
+						GUILayout.Label(unlockedFlag.Key.name + " : " + unlockedFlag.Value);
+						GUILayout.EndHorizontal();
+					}
+				}
+
+				GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
+				if (GUILayout.Button("Increase Meditation", GUILayout.Width(200f), GUILayout.Height(20f)))
+				{
+					foreach (KeyValuePair<BlueprintUnlockableFlag, int> unlockedFlag in Game.Instance.Player.UnlockableFlags.UnlockedFlags)
+					{
+						if (unlockedFlag.Key.name.Equals("Meditation"))
+						{
+							Game.Instance.Player.UnlockableFlags.SetFlagValue(unlockedFlag.Key, Game.Instance.Player.UnlockableFlags.GetFlagValue(unlockedFlag.Key) + 1); ;
+						}
+					}
+				}
+
+				GUILayout.EndHorizontal();
+				GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
+				if (GUILayout.Button("STOP CUTSCENE!!!!!!!", GUILayout.Width(200f), GUILayout.Height(20f)))
+				{
+					Game.Instance.GameCommandQueue.SkipCutscene();
+				}
+
+				GUILayout.EndHorizontal();
+				GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
+				if (GUILayout.Button("Replace Yrliet bark", GUILayout.Width(200f), GUILayout.Height(20f)))
+				{
+					Cutscene cs2 = ResourcesLibrary.TryGetBlueprint<Cutscene>("fe236c09e1d04d088a1c69973b2db010");
+					CutscenePlayerView.Play(cs2);
+				}
+				GUILayout.EndHorizontal();
+
+				GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
+				GUILayout.Label("s: " + s);
+				GUILayout.EndHorizontal();
+
+				GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
+				if (GUILayout.Button("Save portraits", GUILayout.Width(200f), GUILayout.Height(20f)))
+				{
+
+
+
+
+					string dir = Path.Combine(CustomPortraitsManager.PortraitsRootFolderPath, "NpcPortrait - " + "Idira_Changed");
+
+					Directory.CreateDirectory(dir);
+
+
+					BlueprintPortrait bp = ResourcesLibrary.TryGetBlueprint<BlueprintPortrait>("7f06e09da991435fbe188cd9c38f39f3");
+
+					LoadingProcess.Instance.StartCoroutine(Helpers.ExportSprite(bp.Data.FullLengthPortrait, Path.Combine(dir, "Fulllength.png")));
+					LoadingProcess.Instance.StartCoroutine(Helpers.ExportSprite(bp.Data.HalfLengthPortrait, Path.Combine(dir, "Medium.png")));
+					LoadingProcess.Instance.StartCoroutine(Helpers.ExportSprite(bp.Data.SmallPortrait, Path.Combine(dir, "Small.png")));
+
+
+
+					dir = Path.Combine(CustomPortraitsManager.PortraitsRootFolderPath, "NpcPortrait - " + "Jae_Changed");
+
+					Directory.CreateDirectory(dir);
+
+					bp = ResourcesLibrary.TryGetBlueprint<BlueprintPortrait>("76169c62a9a848f8b4ac67a1cc19d6f1");
+
+					LoadingProcess.Instance.StartCoroutine(Helpers.ExportSprite(bp.Data.FullLengthPortrait, Path.Combine(dir, "Fulllength.png")));
+					LoadingProcess.Instance.StartCoroutine(Helpers.ExportSprite(bp.Data.HalfLengthPortrait, Path.Combine(dir, "Medium.png")));
+					LoadingProcess.Instance.StartCoroutine(Helpers.ExportSprite(bp.Data.SmallPortrait, Path.Combine(dir, "Small.png")));
+
+
+					dir = Path.Combine(CustomPortraitsManager.PortraitsRootFolderPath, "NpcPortrait - " + "Jae");
+
+					Directory.CreateDirectory(dir);
+
+					bp = ResourcesLibrary.TryGetBlueprint<BlueprintPortrait>("a0c6745df40a492391e848d090f4a861");
+
+					LoadingProcess.Instance.StartCoroutine(Helpers.ExportSprite(bp.Data.FullLengthPortrait, Path.Combine(dir, "Fulllength.png")));
+					LoadingProcess.Instance.StartCoroutine(Helpers.ExportSprite(bp.Data.HalfLengthPortrait, Path.Combine(dir, "Medium.png")));
+					LoadingProcess.Instance.StartCoroutine(Helpers.ExportSprite(bp.Data.SmallPortrait, Path.Combine(dir, "Small.png")));
+
+
+				}
+				GUILayout.EndHorizontal();
+		#endif
 			
-			GUILayout.EndHorizontal(); 
-			GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
-			if (GUILayout.Button("STOP CUTSCENE!!!!!!!", GUILayout.Width(200f), GUILayout.Height(20f)))
-			{
-				Game.Instance.GameCommandQueue.SkipCutscene();
-			}
-			/*
-			GUILayout.EndHorizontal(); 
-			GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
-			if (GUILayout.Button("Replace Yrliet bark", GUILayout.Width(200f), GUILayout.Height(20f)))
-			{
-				Cutscene cs = ResourcesLibrary.TryGetBlueprint<Cutscene>("fe236c09e1d04d088a1c69973b2db010");
-				CutscenePlayerView.Play(cs);
-			}
-			GUILayout.EndHorizontal();
-			*/
-			GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
-			GUILayout.Label("s: " + s);
-			GUILayout.EndHorizontal();
-
-			GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
-			if (GUILayout.Button("Save portrait", GUILayout.Width(200f), GUILayout.Height(20f)))
-			{
-
-
-				
-
-				string dir = Path.Combine(CustomPortraitsManager.PortraitsRootFolderPath, "NpcPortrait - " + "Idira_Changed");
-
-				Directory.CreateDirectory(dir);
-
-
-				BlueprintPortrait bp = ResourcesLibrary.TryGetBlueprint<BlueprintPortrait>("7f06e09da991435fbe188cd9c38f39f3");
-
-				LoadingProcess.Instance.StartCoroutine(Helpers.ExportSprite(bp.Data.FullLengthPortrait, Path.Combine(dir, "Fulllength.png")));
-				LoadingProcess.Instance.StartCoroutine(Helpers.ExportSprite(bp.Data.HalfLengthPortrait, Path.Combine(dir, "Medium.png")));
-				LoadingProcess.Instance.StartCoroutine(Helpers.ExportSprite(bp.Data.SmallPortrait, Path.Combine(dir, "Small.png")));
-
-				
-
-				dir = Path.Combine(CustomPortraitsManager.PortraitsRootFolderPath, "NpcPortrait - " + "Jae_Changed");
-
-				Directory.CreateDirectory(dir);
-
-				bp = ResourcesLibrary.TryGetBlueprint<BlueprintPortrait>("76169c62a9a848f8b4ac67a1cc19d6f1");
-
-				LoadingProcess.Instance.StartCoroutine(Helpers.ExportSprite(bp.Data.FullLengthPortrait, Path.Combine(dir, "Fulllength.png")));
-				LoadingProcess.Instance.StartCoroutine(Helpers.ExportSprite(bp.Data.HalfLengthPortrait, Path.Combine(dir, "Medium.png")));
-				LoadingProcess.Instance.StartCoroutine(Helpers.ExportSprite(bp.Data.SmallPortrait, Path.Combine(dir, "Small.png")));
-
-
-				dir = Path.Combine(CustomPortraitsManager.PortraitsRootFolderPath, "NpcPortrait - " + "Jae");
-
-				Directory.CreateDirectory(dir);
-
-				bp = ResourcesLibrary.TryGetBlueprint<BlueprintPortrait>("a0c6745df40a492391e848d090f4a861");
-
-				LoadingProcess.Instance.StartCoroutine(Helpers.ExportSprite(bp.Data.FullLengthPortrait, Path.Combine(dir, "Fulllength.png")));
-				LoadingProcess.Instance.StartCoroutine(Helpers.ExportSprite(bp.Data.HalfLengthPortrait, Path.Combine(dir, "Medium.png")));
-				LoadingProcess.Instance.StartCoroutine(Helpers.ExportSprite(bp.Data.SmallPortrait, Path.Combine(dir, "Small.png")));
-
-
-			}
-			GUILayout.EndHorizontal();
-#endif
 		}
 
 
-		/*
+        /*
 foreach (BaseUnitEntity bue in Game.Instance.Player.AllCharacters)
 {
 }
 */
-		/*
+        /*
 		foreach (Quest quest in Game.Instance.Player.QuestBook.Quests)
 		{
 			foreach (BlueprintQuestObjective objective in quest.Blueprint.AllObjectives)
@@ -648,7 +718,7 @@ foreach (BaseUnitEntity bue in Game.Instance.Player.AllCharacters)
 
 
 
-		//-:cnd:noEmit
+        //-:cnd:noEmit
 #if DEBUG
 		static bool OnUnload(UnityModManager.ModEntry modEntry)
         {
@@ -657,7 +727,7 @@ foreach (BaseUnitEntity bue in Game.Instance.Player.AllCharacters)
         }
 #endif
 
-		public static bool isModEnabled;
+        public static bool isModEnabled;
 		public static bool isRTLoaded = false;
 
 		private static bool OnToggle(UnityModManager.ModEntry modEntry, bool value)
@@ -668,7 +738,111 @@ foreach (BaseUnitEntity bue in Game.Instance.Player.AllCharacters)
 
 			return true;
 		}
-		
+
+		private static void OnSaveGUI(UnityModManager.ModEntry modEntry)
+		{
+			Main.settings.Save(modEntry);
+		}
+		private static void OnShowGUI(UnityModManager.ModEntry modEntry)
+		{
+			Main.settings.dev = false;
+		}
+        private static void OnHideGUI(UnityModManager.ModEntry modEntry)
+		{
+			Main.settings.Save(modEntry);
+
+
+			if (ResourcesLibrary.TryGetBlueprint<BlueprintAnswersList>("2e582cda6d9846b0ab10a338adadd945") != null)
+			{
+				BlueprintAnswersList answersList = ResourcesLibrary.TryGetBlueprint<BlueprintAnswersList>("2e582cda6d9846b0ab10a338adadd945");
+
+				// BlueprintAnswer ba = ResourcesLibrary.TryGetBlueprint<BlueprintAnswer>("d35f72efa8cd4b6a995e87ca9ded7d9e");
+
+				foreach (BlueprintAnswer ba in answersList.Answers)
+				{
+					if (ba.name.Contains("simpledialog"))
+					{
+
+						ConditionsHolder conditionsHolder3 = ResourcesLibrary.TryGetScriptable<ConditionsHolder>("dfb41c35-b930-4d6b-9d27-f34b44f403fc");
+						if (conditionsHolder3 == null)
+						{
+							conditionsHolder3 = Helpers.CreateAndAddESO<ConditionsHolder>("SexYrliet", "dfb41c35-b930-4d6b-9d27-f34b44f403fc");
+						}
+
+
+						if (settings.male && settings.female)
+						{
+							var specificInstances = ba.ShowConditions.Conditions.OfType<PcMale>();
+							var specificInstances2 = ba.ShowConditions.Conditions.OfType<PcFemale>();
+
+							if (specificInstances.Count() > 0 || specificInstances2.Count() > 0)
+                            {
+								List<Condition> list = new List<Condition>(ba.ShowConditions.Conditions);
+
+								Condition instanceToRemove = list.Find(item => item is PcFemale || item is PcMale);
+
+								if (instanceToRemove != null)
+									list.Remove(instanceToRemove);
+
+								ba.ShowConditions.Conditions = list.ToArray();
+							}
+
+						}
+						else if (settings.female)
+						{
+							var specificInstances = ba.ShowConditions.Conditions.OfType<PcFemale>();
+						
+							if (specificInstances.Count() == 0)
+							{
+								List<Condition> list = new List<Condition>(ba.ShowConditions.Conditions);
+
+								Condition instanceToRemove = list.Find(item => item is PcMale);
+
+								if (instanceToRemove != null)
+									list.Remove(instanceToRemove);
+
+								var sex = Helpers.CreateElement<PcFemale>(conditionsHolder3);
+
+								list.Add(sex);
+
+								ba.ShowConditions.Conditions = list.ToArray();
+							}
+
+						}
+						else if (settings.male)
+						{
+							var specificInstances = ba.ShowConditions.Conditions.OfType<PcMale>();
+						
+							if (specificInstances.Count() == 0)
+							{
+								List<Condition> list = new List<Condition>(ba.ShowConditions.Conditions);
+
+								Condition instanceToRemove = list.Find(item => item is PcFemale);
+
+								if (instanceToRemove != null)
+									list.Remove(instanceToRemove);
+
+								var sex = Helpers.CreateElement<PcMale>(conditionsHolder3);
+
+								list.Add(sex);
+
+								ba.ShowConditions.Conditions = list.ToArray();
+							}
+
+						}
+
+					}
+				}
+			}
+
+
+
+
+
+
+
+		}
+
 		//+:cnd:noEmit
 	}
 

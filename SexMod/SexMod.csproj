@@ -13,81 +13,90 @@
 			https://api.nuget.org/v3/index.json;
 			https://nuget.bepinex.dev/v3/index.json;
 		</RestoreAdditionalProjectSources>
-		<RogueTraderData>$(LocalAppData)Low\Owlcat Games\Warhammer 40000 Rogue Trader</RogueTraderData>
+		<RogueTraderData>c:\Users\info\AppData\LocalLow\Owlcat Games\Warhammer 40000 Rogue Trader</RogueTraderData>
 	</PropertyGroup>
-
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-	  <OutputPath>C:\Users\walle\AppData\LocalLow\Owlcat Games\Warhammer 40000 Rogue Trader\UnityModManager\SexMod\</OutputPath>
+	  <OutputPath>g:\My Drive\Personal Projects\SexMod\SexMod\</OutputPath>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-	  <OutputPath>C:\Users\walle\AppData\LocalLow\Owlcat Games\Warhammer 40000 Rogue Trader\UnityModManager\SexMod\</OutputPath>
+	  <OutputPath>g:\My Drive\Personal Projects\SexMod\SexMod\</OutputPath>
 	</PropertyGroup>
+
+	<ItemGroup>
+	  <Compile Include="DialogCreate.cs" />
+	  <Compile Include="Extensions.cs" />
+	  <Compile Include="Helpers.cs" />
+	  <Compile Include="Imageheader.cs" />
+	  <Compile Include="Main.cs" />
+	  <Compile Include="ObjectDeepCopier.cs" />
+	  <Compile Include="Settings.cs" />
+	  <Compile Include="SimpleDialog.cs" />
+	</ItemGroup>
 	<ItemGroup>
 		<Reference Include="0Harmony">
-		  <HintPath>D:\Steam\steamapps\common\Warhammer 40,000 Rogue Trader\WH40KRT_Data\Managed\0Harmony.dll</HintPath>
-		  <Private>false</Private>
+		  <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Warhammer 40,000 Rogue Trader\WH40KRT_Data\Managed\0Harmony.dll</HintPath>
 		</Reference>
 		<Reference Include="AssemblyPublicizer">
 		  <HintPath>..\..\CustomNpcPortraits\packages\AssemblyPublicizer.1.0.2\lib\net472\AssemblyPublicizer.dll</HintPath>
 		  <Private>false</Private>
 		</Reference>
 		<Reference Include="Code">
-		  <HintPath>D:\Steam\steamapps\common\Warhammer 40,000 Rogue Trader\WH40KRT_Data\Managed\Code.dll</HintPath>
+		  <HintPath>c:\Program Files (x86)\Steam\steamapps\common\Warhammer 40,000 Rogue Trader\WH40KRT_Data\Managed\Code.dll</HintPath>
 		</Reference>
 		<Reference Include="Kingmaker.Blueprints.Base">
-		  <HintPath>D:\Steam\steamapps\common\Warhammer 40,000 Rogue Trader\WH40KRT_Data\Managed\Kingmaker.Blueprints.Base.dll</HintPath>
+		  <HintPath>c:\Program Files (x86)\Steam\steamapps\common\Warhammer 40,000 Rogue Trader\WH40KRT_Data\Managed\Kingmaker.Blueprints.Base.dll</HintPath>
 		  <Private>false</Private>
 		</Reference>
 		<Reference Include="Kingmaker.Controllers.Enums">
-		  <HintPath>D:\Steam\steamapps\common\Warhammer 40,000 Rogue Trader\WH40KRT_Data\Managed\Kingmaker.Controllers.Enums.dll</HintPath>
+		  <HintPath>c:\Program Files (x86)\Steam\steamapps\common\Warhammer 40,000 Rogue Trader\WH40KRT_Data\Managed\Kingmaker.Controllers.Enums.dll</HintPath>
 		  <Private>false</Private>
 		</Reference>
 		<Reference Include="Kingmaker.Controllers.Interfaces">
-		  <HintPath>D:\Steam\steamapps\common\Warhammer 40,000 Rogue Trader\WH40KRT_Data\Managed\Kingmaker.Controllers.Interfaces.dll</HintPath>
+		  <HintPath>c:\Program Files (x86)\Steam\steamapps\common\Warhammer 40,000 Rogue Trader\WH40KRT_Data\Managed\Kingmaker.Controllers.Interfaces.dll</HintPath>
 		  <Private>false</Private>
 		</Reference>
 		<Reference Include="Kingmaker.Enums">
-		  <HintPath>D:\Steam\steamapps\common\Warhammer 40,000 Rogue Trader\WH40KRT_Data\Managed\Kingmaker.Enums.dll</HintPath>
+		  <HintPath>c:\Program Files (x86)\Steam\steamapps\common\Warhammer 40,000 Rogue Trader\WH40KRT_Data\Managed\Kingmaker.Enums.dll</HintPath>
 		  <Private>false</Private>
 		</Reference>
 		<Reference Include="Kingmaker.Localization.Enums">
-		  <HintPath>D:\Steam\steamapps\common\Warhammer 40,000 Rogue Trader\WH40KRT_Data\Managed\Kingmaker.Localization.Enums.dll</HintPath>
+		  <HintPath>c:\Program Files (x86)\Steam\steamapps\common\Warhammer 40,000 Rogue Trader\WH40KRT_Data\Managed\Kingmaker.Localization.Enums.dll</HintPath>
 		  <Private>false</Private>
 		</Reference>
 		<Reference Include="Kingmaker.Utility.Enums">
-		  <HintPath>D:\Steam\steamapps\common\Warhammer 40,000 Rogue Trader\WH40KRT_Data\Managed\Kingmaker.Utility.Enums.dll</HintPath>
+		  <HintPath>c:\Program Files (x86)\Steam\steamapps\common\Warhammer 40,000 Rogue Trader\WH40KRT_Data\Managed\Kingmaker.Utility.Enums.dll</HintPath>
 		  <Private>false</Private>
 		</Reference>
 		<Reference Include="LocalizationShared">
-		  <HintPath>D:\Steam\steamapps\common\Warhammer 40,000 Rogue Trader\WH40KRT_Data\Managed\LocalizationShared.dll</HintPath>
+		  <HintPath>c:\Program Files (x86)\Steam\steamapps\common\Warhammer 40,000 Rogue Trader\WH40KRT_Data\Managed\LocalizationShared.dll</HintPath>
 		  <Private>false</Private>
 		</Reference>
 		<Reference Include="Newtonsoft.Json">
-		  <HintPath>D:\Steam\steamapps\common\Warhammer 40,000 Rogue Trader\WH40KRT_Data\Managed\Newtonsoft.Json.dll</HintPath>
+		  <HintPath>c:\Program Files (x86)\Steam\steamapps\common\Warhammer 40,000 Rogue Trader\WH40KRT_Data\Managed\Newtonsoft.Json.dll</HintPath>
 		  <Private>false</Private>
 		</Reference>
 		<Reference Include="Owlcat.Runtime.Core">
-		  <HintPath>D:\Steam\steamapps\common\Warhammer 40,000 Rogue Trader\WH40KRT_Data\Managed\Owlcat.Runtime.Core.dll</HintPath>
+		  <HintPath>c:\Program Files (x86)\Steam\steamapps\common\Warhammer 40,000 Rogue Trader\WH40KRT_Data\Managed\Owlcat.Runtime.Core.dll</HintPath>
 		  <Private>false</Private>
 		</Reference>
 		<Reference Include="Owlcat.Runtime.UI">
-		  <HintPath>D:\Steam\steamapps\common\Warhammer 40,000 Rogue Trader\WH40KRT_Data\Managed\Owlcat.Runtime.UI.dll</HintPath>
+		  <HintPath>c:\Program Files (x86)\Steam\steamapps\common\Warhammer 40,000 Rogue Trader\WH40KRT_Data\Managed\Owlcat.Runtime.UI.dll</HintPath>
 		  <Private>false</Private>
 		</Reference>
 		<Reference Include="RogueTrader.GameCore">
-		  <HintPath>D:\Steam\steamapps\common\Warhammer 40,000 Rogue Trader\WH40KRT_Data\Managed\RogueTrader.GameCore.dll</HintPath>
+		  <HintPath>c:\Program Files (x86)\Steam\steamapps\common\Warhammer 40,000 Rogue Trader\WH40KRT_Data\Managed\RogueTrader.GameCore.dll</HintPath>
 		</Reference>
 		<Reference Include="RogueTrader.NetPlayer">
-		  <HintPath>D:\Steam\steamapps\common\Warhammer 40,000 Rogue Trader\WH40KRT_Data\Managed\RogueTrader.NetPlayer.dll</HintPath>
+		  <HintPath>c:\Program Files (x86)\Steam\steamapps\common\Warhammer 40,000 Rogue Trader\WH40KRT_Data\Managed\RogueTrader.NetPlayer.dll</HintPath>
 		  <Private>false</Private>
 		</Reference>
 		<Reference Include="RogueTrader.SharedTypes">
-		  <HintPath>D:\Steam\steamapps\common\Warhammer 40,000 Rogue Trader\WH40KRT_Data\Managed\RogueTrader.SharedTypes.dll</HintPath>
+		  <HintPath>c:\Program Files (x86)\Steam\steamapps\common\Warhammer 40,000 Rogue Trader\WH40KRT_Data\Managed\RogueTrader.SharedTypes.dll</HintPath>
 		  <Private>false</Private>
 		</Reference>
 		<Reference Include="UnityModManager">
-		  <HintPath>..\..\..\..\AppData\LocalLow\Owlcat Games\Warhammer 40000 Rogue Trader\UnityModManager\UnityModManager.dll</HintPath>
+		  <HintPath>c:\Users\info\AppData\LocalLow\Owlcat Games\Warhammer 40000 Rogue Trader\UnityModManager\UnityModManager.dll</HintPath>
 		  <Private>false</Private>
 		</Reference>
 	</ItemGroup>
